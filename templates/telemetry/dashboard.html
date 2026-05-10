@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Operator Dashboard{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>Operator Dashboard - Active Drones</h2>
+    </div>
+</div>
+
+<div class="row" id="drones-container">
+    <div class="col-12 text-center" id="loading-spinner">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+</div>
+
+<!-- Template for Drone Card -->
+<template id="drone-card-template">
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Drone #<span class="drone-id"></span></h5>
+                <span class="badge bg-light text-dark status-badge">Unknown</span>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    <strong>Latitude:</strong> <span class="drone-lat"></span><br>
+                    <strong>Longitude:</strong> <span class="drone-lon"></span><br>
+                    <strong>Altitude:</strong> <span class="drone-alt"></span> m<br>
+                    <strong>Speed:</strong> <span class="drone-speed"></span> m/s<br>
+                    <strong>Battery:</strong> <span class="drone-battery"></span>%
+                </p>
+                <div class="progress mb-3" style="height: 10px;">
+                    <div class="progress-bar battery-progress" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <p class="text-muted small">Last updated: <span class="drone-updated"></span></p>
+            </div>
+            <div class="card-footer bg-transparent border-top-0 pb-3">
+                <button class="btn btn-danger w-100 btn-emergency-stop" data-drone-id="">
+                    Emergency Stop
+                </button>
+            </div>
+        </div>
+    </div>
+</template>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dronesContainer = document.getElementById('drones-container');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const template = document.getElementById('drone-card-template');
+
+        // Function to update or create a drone card
+        function updateDroneCard(drone) {
+            let card = document.getElementById(`drone-card-${drone.drone_id}`);
+            
+            if (!card) {
+                // Create new card from template
+                const clone = template.content.cloneNode(true);
+                card = clone.querySelector('.card').parentNode;
+                card.id = `drone-card-${drone.drone_id}`;
+                
+                // Set initial drone ID
+                card.querySelector('.drone-id').textContent = drone.drone_id;
+                card.querySelector('.btn-emergency-stop').dataset.droneId = drone.drone_id;
+                
+                // Add event listener to emergency stop button
+                card.querySelector('.btn-emergency-stop').addEventListener('click', handleEmergencyStop);
+                
+                dronesContainer.appendChild(card);
+            }
+
+            // Update card data
+            card.querySelector('.drone-lat').textContent = drone.latitude.toFixed(6);
+            card.querySelector('.drone-lon').textContent = drone.longitude.toFixed(6);
+            card.querySelector('.drone-alt').textContent = drone.altitude.toFixed(1);
+            card.querySelector('.drone-speed').textContent = drone.speed.toFixed(1);
+            card.querySelector('.drone-battery').textContent = drone.battery_level;
+            
+            const batteryBar = card.querySelector('.battery-progress');
+            batteryBar.style.width = `${drone.battery_level}%`;
+            batteryBar.setAttribute('aria-valuenow', drone.battery_level);
+            
+            if (drone.battery_level <= 20) {
+                batteryBar.classList.replace('bg-primary', 'bg-danger');
+                batteryBar.classList.replace('bg-warning', 'bg-danger');
+            } else if (drone.battery_level <= 50) {
+                batteryBar.classList.replace('bg-primary', 'bg-warning');
+                batteryBar.classList.replace('bg-danger', 'bg-warning');
+            } else {
+                batteryBar.classList.replace('bg-warning', 'bg-primary');
+                batteryBar.classList.replace('bg-danger', 'bg-primary');
+            }
+
+            // Format timestamp
+            const updatedDate = new Date(drone.timestamp);
+            card.querySelector('.drone-updated').textContent = updatedDate.toLocaleTimeString();
+
+            // Status indicator (basic logic, can be improved)
+            const statusBadge = card.querySelector('.status-badge');
+            if (drone.speed > 0) {
+                statusBadge.textContent = 'In Flight';
+                statusBadge.className = 'badge bg-success text-white status-badge';
+            } else {
+                statusBadge.textContent = 'Hovering/Landed';
+                statusBadge.className = 'badge bg-secondary text-white status-badge';
+            }
+        }
+
+        // Fetch telemetry data
+        function fetchTelemetry() {
+            // Include auth token if needed: 
+            // const token = localStorage.getItem('access_token');
+            // const headers = { 'Authorization': `Bearer ${token}` };
+            
+            fetch('/api/telemetry/latest/')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (loadingSpinner) {
+                        loadingSpinner.style.display = 'none';
+                    }
+                    
+                    // Assuming data is an array of latest telemetry objects
+                    if (Array.isArray(data)) {
+                        data.forEach(drone => updateDroneCard(drone));
+                    } else if (data && data.drone_id) {
+                        // If single object
+                        updateDroneCard(data);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching telemetry:', error);
+                });
+        }
+
+        // Emergency Stop Handler
+        function handleEmergencyStop(event) {
+            const droneId = event.target.dataset.droneId;
+            if (!confirm(`Are you sure you want to perform an EMERGENCY STOP for Drone #${droneId}?`)) {
+                return;
+            }
+
+            const button = event.target;
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Stopping...';
+
+            // Example PATCH request for emergency stop
+            // Needs exact endpoint depending on backend implementation
+            const stopEndpoint = `/api/telemetry/drones/${droneId}/stop/`; 
+            
+            fetch(stopEndpoint, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // 'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                },
+                body: JSON.stringify({ status: 'emergency_stop' })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to execute emergency stop');
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert(`Emergency stop triggered for Drone #${droneId}`);
+                button.innerHTML = 'STOPPED';
+                button.classList.replace('btn-danger', 'btn-dark');
+                // You can also change the drone card status visually here
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(`Failed to stop drone: ${error.message}`);
+                button.disabled = false;
+                button.innerHTML = 'Emergency Stop';
+            });
+        }
+
+        // Initial fetch
+        fetchTelemetry();
+
+        // Polling every 5 seconds
+        setInterval(fetchTelemetry, 5000);
+    });
+</script>
+{% endblock %}

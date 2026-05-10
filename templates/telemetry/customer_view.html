@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Delivery Progress{% endblock %}
+
+{% block content %}
+<div class="row mt-5">
+    <div class="col-md-8 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">Отслеживание заказа</h4>
+            </div>
+            <div class="card-body">
+                <h5>Статус доставки: <span id="status-text" class="text-primary">В пути</span></h5>
+                <p>Адрес: <span id="address-text">{{ mission.delivery_address|default:"Загрузка..." }}</span></p>
+
+                <!-- Прогресс-бар доставки еды -->
+                <div class="progress mt-4 mb-3" style="height: 30px;">
+                    <div id="delivery-progress" class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" style="width: 50%;" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">50% (От кухни до двери)</div>
+                </div>
+
+                <p class="text-muted text-center mt-3">Ваш заказ доставляется дроном на автопилоте.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
