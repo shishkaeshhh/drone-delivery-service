@@ -1,6 +1,12 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Drone, DeliveryMission
+from .models import Drone, DeliveryMission, CatalogItem
+
+@admin.register(CatalogItem)
+class CatalogItemAdmin(admin.ModelAdmin):
+    list_display = ('name', 'store', 'price')
+    list_filter = ('store',)
+    search_fields = ('name',)
 
 @admin.register(Drone)
 class DroneAdmin(admin.ModelAdmin):

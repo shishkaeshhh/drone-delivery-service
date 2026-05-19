@@ -10,14 +10,14 @@ from delivery.models import Drone
 
 def populate():
     drones_data = [
-        {'name': 'Alpha-1', 'status': 'ready', 'battery_level': 100},
-        {'name': 'Beta-2', 'status': 'in_flight', 'battery_level': 65},
-        {'name': 'Gamma-3', 'status': 'charging', 'battery_level': 20},
-        {'name': 'Delta-4', 'status': 'ready', 'battery_level': 98},
+        {'serial_number': 'DRN-ALPHA-1', 'model_name': 'Alpha-1', 'status': 'ready', 'battery_level': 100},
+        {'serial_number': 'DRN-BETA-2', 'model_name': 'Beta-2', 'status': 'flying', 'battery_level': 65},
+        {'serial_number': 'DRN-GAMMA-3', 'model_name': 'Gamma-3', 'status': 'charging', 'battery_level': 20},
+        {'serial_number': 'DRN-DELTA-4', 'model_name': 'Delta-4', 'status': 'ready', 'battery_level': 98},
     ]
 
     for data in drones_data:
-        Drone.objects.get_or_create(name=data['name'], defaults=data)
+        Drone.objects.get_or_create(serial_number=data['serial_number'], defaults=data)
     
     print(f"Successfully populated {len(drones_data)} drones.")
 

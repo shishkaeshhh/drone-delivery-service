@@ -8,10 +8,12 @@ class DroneSerializer(serializers.ModelSerializer):
 
 class WebMissionSerializer(serializers.ModelSerializer):
     drone_details = DroneSerializer(source='drone', read_only=True)
+    customer = serializers.PrimaryKeyRelatedField(read_only=True)
     
     class Meta:
         model = DeliveryMission
         fields = ['id', 'customer', 'drone', 'drone_details', 'delivery_address', 'order_content', 'status', 'created_at']
+        read_only_fields = ['status', 'created_at']
 
 class MobileMissionSerializer(serializers.ModelSerializer):
     current_coordinates = serializers.SerializerMethodField()

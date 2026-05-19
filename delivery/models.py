@@ -33,3 +33,21 @@ class DeliveryMission(models.Model):
 
     def __str__(self):
         return f"Mission {self.id} for {self.customer}"
+
+class CatalogItem(models.Model):
+    STORE_CHOICES = [
+        ('vkusvill', 'ВкусВилл'),
+        ('magnit', 'Магнит'),
+        ('pyaterochka', 'Пятерочка'),
+        ('lenta', 'Лента'),
+        ('depo', 'Фудмолл Депо'),
+        ('syrovarnya', 'Сыроварня'),
+        ('white_rabbit', 'White Rabbit'),
+        ('pushkin', 'Кафе Пушкинъ')
+    ]
+    store = models.CharField(max_length=50, choices=STORE_CHOICES)
+    name = models.CharField(max_length=255)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.name} ({self.get_store_display()}) - {self.price} руб."

@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import TelemetryViewSet, LatestTelemetryView, EmergencyStopView, DashboardView
+from .views import TelemetryViewSet, LatestTelemetryView, EmergencyStopView
 
 router = DefaultRouter()
 router.register(r'logs', TelemetryViewSet, basename='telemetry')

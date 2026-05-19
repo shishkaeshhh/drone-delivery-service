@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Drone Delivery BFF Prototype</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <aside class="sidebar" aria-label="Навигация прототипа">
+        <div class="brand">
+          <div class="brand-mark">DD</div>
+          <div>
+            <h1>Drone Delivery</h1>
+            <p>BFF prototype</p>
+          </div>
+        </div>
+
+        <form id="login-form" class="panel login-panel">
+          <label>
+            API URL
+            <input id="base-url" name="baseUrl" type="url" value="http://localhost:8000" autocomplete="url">
+          </label>
+          <label>
+            Логин
+            <input id="username" name="username" type="text" value="client_1" autocomplete="username">
+          </label>
+          <label>
+            Пароль
+            <input id="password" name="password" type="password" value="pass1234" autocomplete="current-password">
+          </label>
+          <button class="primary-action" type="submit">Войти</button>
+          <p id="auth-status" class="status-line">Токен не получен</p>
+        </form>
+
+        <nav class="role-tabs" aria-label="BFF сценарии">
+          <button class="tab-button active" type="button" data-view="customer">Клиент</button>
+          <button class="tab-button" type="button" data-view="manager">Менеджер</button>
+          <button class="tab-button" type="button" data-view="operator">Оператор</button>
+        </nav>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Backend for Frontend</p>
+            <h2 id="view-title">Панель клиента</h2>
+          </div>
+          <div class="topbar-actions">
+            <button id="refresh-button" class="secondary-action" type="button">Обновить</button>
+            <button id="health-button" class="secondary-action" type="button">Health</button>
+          </div>
+        </header>
+
+        <section class="metrics-grid" aria-label="Сводка">
+          <article class="metric">
+            <span class="metric-label">Статус API</span>
+            <strong id="metric-api">Не проверен</strong>
+          </article>
+          <article class="metric">
+            <span class="metric-label">Пользователь</span>
+            <strong id="metric-user">-</strong>
+          </article>
+          <article class="metric">
+            <span class="metric-label">Миссии</span>
+            <strong id="metric-missions">0</strong>
+          </article>
+          <article class="metric accent">
+            <span class="metric-label">Готовые дроны</span>
+            <strong id="metric-drones">0</strong>
+          </article>
+        </section>
+
+        <section id="customer-view" class="view-section active">
+          <div class="content-grid">
+            <form id="order-form" class="panel order-panel">
+              <h3>Новый заказ</h3>
+              <label>
+                Адрес доставки
+                <input id="delivery-address" type="text" value="г. Москва, ул. Арбат, д. 10">
+              </label>
+              <label>
+                Состав заказа
+                <textarea id="order-content" rows="6">[{"store":"vkusvill","name":"Бургер с говядиной","quantity":2}]</textarea>
+              </label>
+              <button class="primary-action" type="submit">Создать заказ</button>
+              <p id="order-status" class="status-line">Готов к отправке</p>
+            </form>
+
+            <div class="panel">
+              <div class="panel-heading">
+                <h3>Мои миссии</h3>
+                <span id="customer-count" class="counter">0</span>
+              </div>
+              <div id="customer-missions" class="list"></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-heading">
+              <h3>Каталог</h3>
+              <span id="catalog-count" class="counter">0</span>
+            </div>
+            <div id="catalog-list" class="catalog-grid"></div>
+          </div>
+        </section>
+
+        <section id="manager-view" class="view-section">
+          <div class="content-grid">
+            <div class="panel">
+              <div class="panel-heading">
+                <h3>Метрики</h3>
+                <span class="counter">live</span>
+              </div>
+              <div id="manager-metrics" class="metrics-list"></div>
+            </div>
+            <div class="panel">
+              <div class="panel-heading">
+                <h3>Миссии</h3>
+                <span id="manager-count" class="counter">0</span>
+              </div>
+              <div id="manager-missions" class="list"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="operator-view" class="view-section">
+          <div class="content-grid three">
+            <div class="panel">
+              <div class="panel-heading">
+                <h3>Новые миссии</h3>
+                <span id="operator-mission-count" class="counter">0</span>
+              </div>
+              <div id="operator-missions" class="list"></div>
+            </div>
+            <div class="panel">
+              <div class="panel-heading">
+                <h3>Дроны</h3>
+                <span id="operator-drone-count" class="counter">0</span>
+              </div>
+              <div id="operator-drones" class="list"></div>
+            </div>
+            <div class="panel">
+              <div class="panel-heading">
+                <h3>Телеметрия</h3>
+                <span id="telemetry-count" class="counter">0</span>
+              </div>
+              <div id="telemetry-list" class="list"></div>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

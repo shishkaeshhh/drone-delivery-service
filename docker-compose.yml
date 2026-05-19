@@ -4,9 +4,9 @@ services:
   db:
     image: postgres:15
     environment:
-      POSTGRES_DB: drone_db
-      POSTGRES_USER: drone_user
-      POSTGRES_PASSWORD: drone_password
+      POSTGRES_DB: ${DB_NAME:-drone_db}
+      POSTGRES_USER: ${DB_USER:-drone_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-drone_password}
     ports:
       - "5432:5432"
     volumes:
@@ -21,7 +21,7 @@ services:
     build: .
     command: >
       bash -c "python manage.py migrate &&
-               python manage.py runserver 0.0.0.0:8000"
+               gunicorn config.wsgi:application --bind 0.0.0.0:8000"
     volumes:
       - .:/app
     ports:
@@ -30,9 +30,13 @@ services:
       - db
       - redis
     environment:
-      - DB_NAME=drone_db
-      - DB_USER=drone_user
-      - DB_PASSWORD=drone_password
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-local-key}
+      - DEBUG=${DEBUG:-True}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-*}
+      - CORS_ALLOW_ALL_ORIGINS=${CORS_ALLOW_ALL_ORIGINS:-True}
+      - DB_NAME=${DB_NAME:-drone_db}
+      - DB_USER=${DB_USER:-drone_user}
+      - DB_PASSWORD=${DB_PASSWORD:-drone_password}
       - DB_HOST=db
       - DB_PORT=5432
       - REDIS_URL=redis://redis:6379/0
